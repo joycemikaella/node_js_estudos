@@ -62,7 +62,7 @@ app.get('/produtos/:idproduto', (req, res) => {
             res.send({ message: "Erro ao conectar ao banco de dados", err: err.message });
         }
 
-        client.query('SELECT * FROM produto where id = $1',[req.params.idproduto], (err, result) => {
+        client.query('SELECT * FROM produto where id = $1', [req.params.idproduto], (err, result) => {
             if (err) {
                 res.send({ message: "Erro pesquisar dado específico", err: err.message });
             }
@@ -79,7 +79,7 @@ app.delete('/produtos/:idproduto', (req, res) => {
             res.send({ message: "Erro ao conectar ao banco de dados", err: err.message });
         }
 
-        client.query('delete FROM produto where id = $1',[req.params.idproduto], (err, result) => {
+        client.query('delete FROM produto where id = $1', [req.params.idproduto], (err, result) => {
             if (err) {
                 res.send({ message: "Erro ao excluir os dados", err: err.message });
             }
@@ -90,21 +90,24 @@ app.delete('/produtos/:idproduto', (req, res) => {
     })
 })
 /* FALTA AJUSTAR ESSE PUT */
-app.put('/produtos:', (req, res) => {
+app.put('/produtos/:idproduto', (req, res) => {
     pool.connect((err, client) => {
         if (err) {
-            return res.status(401).send({ message: 'Erro ao conectar ao banco de dados' });
+            return res.status(401).send({
+                message: 'Erro ao conectaro no database'
+            })
         }
-        //var sql = `insert into produto(descricao, preco)values(${req.body.descricao}, ${req.body.preco})`
-        var sql = 'insert into produto(descricao, preco)values($1, $2)'
-        var dados = [req.body.descricao, req.body.preco]
+        var sql = 'update produto set descricao = $1, preco = $2 where id = $3'
+        var dados = [req.body.descricao, req.body.preco, req.params.idproduto]
         client.query(sql, dados, (error, result) => {
-            if (err) {
-                res.send({ message: "Erro ao executar a query de inserir registro", err: err.message });
+            if (error) {
+                res.send({
+                    message: 'Erro ao atualizar dados',
+                    error: error.message
+                })
             }
-            return res.status.apply(201).send({ message: 'produto inserido com sucesso' })
+            return res.status(200).send({ message: 'atualizado com sucesso' })
         })
-
     })
 })
 app.listen(port, () => {
